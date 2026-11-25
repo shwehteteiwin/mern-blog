@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import useForm from "../hooks/useForm";
 
 const Register = () => {
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const { formData, handleChange } = useForm({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const { name, email, password, confirmPassword } = formData;
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,20 +23,18 @@ const Register = () => {
 
     setError("");
 
-  
-
     try {
       setLoading(true);
 
-    const response = await axios.post(
-  "http://localhost:5000/api/users/register",
-  {
-    name,
-    email,
-    password,
-    password2: confirmPassword,
-  }
-);
+      const response = await axios.post(
+        "http://localhost:5000/api/users/register",
+        {
+          name,
+          email,
+          password,
+          password2: confirmPassword,
+        },
+      );
 
       console.log("Register API:", response.data);
 
@@ -40,7 +43,8 @@ const Register = () => {
       console.error(err);
 
       setError(
-        err.response?.data?.message || "Registration failed. Please try again."
+        err.response?.data?.message ||
+          "Registration failed. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -61,7 +65,6 @@ const Register = () => {
 
         <form
           autoComplete="off"
-
           onSubmit={handleRegister}
           className="rounded-[32px] bg-white p-7 shadow-md"
         >
@@ -74,10 +77,10 @@ const Register = () => {
 
               <input
                 type="text"
-                value={name}
-                  autoComplete="off"
-
-                onChange={(e) => setName(e.target.value)}
+                name="name"
+                value={formData.name}
+                autoComplete="off"
+                onChange={handleChange}
                 placeholder="Enter your name"
                 className="mt-2 w-full rounded-2xl border border-[#DDE5DD] bg-[#F8FAF6] px-4 py-3 text-sm outline-none transition focus:border-[#588157]"
               />
@@ -90,10 +93,10 @@ const Register = () => {
 
               <input
                 type="email"
-                value={email}
-                  autoComplete="off"
-
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formData.email}
+                autoComplete="off"
+                onChange={handleChange}
                 placeholder="Enter your email"
                 className="mt-2 w-full rounded-2xl border border-[#DDE5DD] bg-[#F8FAF6] px-4 py-3 text-sm outline-none transition focus:border-[#588157]"
               />
@@ -106,10 +109,10 @@ const Register = () => {
 
               <input
                 type="password"
-                  autoComplete="off"
-
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={formData.password}
+                autoComplete="off"
+                onChange={handleChange}
                 placeholder="Create a password"
                 className="mt-2 w-full rounded-2xl border border-[#DDE5DD] bg-[#F8FAF6] px-4 py-3 text-sm outline-none transition focus:border-[#588157]"
               />
@@ -122,14 +125,15 @@ const Register = () => {
 
               <input
                 type="password"
-                value={confirmPassword}
-                  autoComplete="off"
-
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                autoComplete="off"
+                onChange={handleChange}
                 placeholder="Confirm your password"
                 className="mt-2 w-full rounded-2xl border border-[#DDE5DD] bg-[#F8FAF6] px-4 py-3 text-sm outline-none transition focus:border-[#588157]"
               />
             </div>
+
           </div>
 
           {error && (
@@ -163,6 +167,7 @@ const Register = () => {
         >
           ← Back to Stories
         </Link>
+
       </div>
     </div>
   );

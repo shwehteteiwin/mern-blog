@@ -2,12 +2,20 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import useAuthStore from "../stores/authStore";
-
+import useForm from "../hooks/useForm";
 const Login = () => {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const {
+    formData,
+    handleChange,
+  } = useForm({
+    email: "",
+    password: "",
+  });
+
+  const { email, password } = formData;
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,15 +37,16 @@ const Login = () => {
       );
 
       console.log("Login API:", response.data);
+
       const { token, id, name } = response.data;
 
-login(
-  {
-    id,
-    name,
-  },
-  token
-);
+      login(
+        {
+          id,
+          name,
+        },
+        token,
+      );
 
       navigate("/");
     } catch (err) {
@@ -70,31 +79,35 @@ login(
         <form
           onSubmit={handleLogin}
           autoComplete="off"
-          className="rounded-[32px] bg-white p-7 shadow-md"
+          className="rounded-4xl bg-white p-7 shadow-md"
         >
           <div>
-            <label className="text-sm font-bold text-[#344E41]">Email</label>
+            <label className="text-sm font-bold text-[#344E41]">
+              Email
+            </label>
 
             <input
               type="email"
               name="email"
               autoComplete="off"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
               placeholder="Enter your email"
               className="mt-2 w-full rounded-2xl border border-[#DDE5DD] bg-[#F8FAF6] px-4 py-3 text-sm outline-none transition focus:border-[#588157]"
             />
           </div>
 
           <div className="mt-4">
-            <label className="text-sm font-bold text-[#344E41]">Password</label>
+            <label className="text-sm font-bold text-[#344E41]">
+              Password
+            </label>
 
             <input
               type="password"
               name="password"
               autoComplete="off"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleChange}
               placeholder="Enter your password"
               className="mt-2 w-full rounded-2xl border border-[#DDE5DD] bg-[#F8FAF6] px-4 py-3 text-sm outline-none transition focus:border-[#588157]"
             />

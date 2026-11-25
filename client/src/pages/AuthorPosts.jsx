@@ -1,36 +1,26 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import useResource from "../hooks/useResource";
 import api from "../lib/api";
+import PostCard from "../components/PostCard";
 
 const AuthorPosts = () => {
   const { id } = useParams();
-  const [posts, setPosts] = useState([]);
-  const [author, setAuthor] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchAuthorPosts = async () => {
-      try {
-        const [postsResponse, userResponse] = await Promise.all([
-          api.get(`/posts/users/${id}`),
-          api.get(`/users/${id}`),
-        ]);
+  const {
+    data: posts,
+    loading: postsLoading,
+    error: postsError,
+  } = useResource(`/posts/users/${id}`);
 
-        console.log("Author Posts API:", postsResponse.data);
+  const {
+    data: author,
+    loading: authorLoading,
+    error: authorError,
+  } = useResource(`/users/${id}`);
 
-        setPosts(postsResponse.data);
-        setAuthor(userResponse.data.name);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load author posts.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [currentPosts, setCurrentPosts] = useState(null);
 
-    fetchAuthorPosts();
-  }, [id]);
   const handleDelete = async (postId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this story?",
@@ -41,8 +31,8 @@ const AuthorPosts = () => {
     try {
       await api.delete(`/posts/${postId}`);
 
-      setPosts((currentPosts) =>
-        currentPosts.filter((post) => post._id !== postId),
+      setCurrentPosts((currentPosts) =>
+        (currentPosts || posts).filter((post) => post._id !== postId),
       );
     } catch (err) {
       console.error(err);
@@ -53,6 +43,12 @@ const AuthorPosts = () => {
       );
     }
   };
+
+  const displayPosts = currentPosts ?? posts ?? [];
+
+  const loading = postsLoading || authorLoading;
+  const error = postsError || authorError;
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FFFDF8]">
@@ -66,33 +62,27 @@ const AuthorPosts = () => {
       <div className="flex min-h-screen items-center justify-center bg-[#FFFDF8] px-6 text-center">
         <div>
           <div className="text-6xl">📖</div>
+
           <h2 className="mt-4 text-2xl font-black text-[#344E41]">
             Something went wrong
           </h2>
-          <p className="mt-2 text-[#78847C]">{error}</p>
+
+          <p className="mt-2 text-[#78847C]">Failed to load author posts.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-[80%] m-auto bg-[#FFFDF8] px-6 py-10">
+    <div className="m-auto min-h-screen w-[80%] bg-[#FFFDF8] px-6 py-10">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
-          {/* <p className="text-sm font-bold text-[#D94F8A]">
-            Author Posts
-          </p> */}
-
           <h1 className="mt-1 text-3xl font-black text-[#344E41]">
-            {author}'s Stories
+            {author?.name}'s Stories
           </h1>
-
-          {/* <p className="mt-2 text-sm text-[#78847C]">
-            Stories written by this author.
-          </p> */}
         </div>
 
-        {posts.length === 0 ? (
+        {displayPosts.length === 0 ? (
           <div className="rounded-[32px] bg-white px-6 py-14 text-center shadow-sm">
             <div className="text-6xl">📖</div>
 
@@ -113,51 +103,13 @@ const AuthorPosts = () => {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <div
+            {displayPosts.map((post) => (
+              <PostCard
                 key={post._id}
-                className="group overflow-hidden rounded-[28px] bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-              >
-                <Link to={`/posts/${post._id}`}>
-                  <div className="h-52 overflow-hidden bg-[#F1F4EF]">
-                    <img
-                      src={`http://localhost:5000/uploads/${post.thumbnail}`}
-                      alt={post.title}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                    />
-                  </div>
-
-                  <div className="p-5">
-                    <span className="inline-block rounded-full bg-[#FFE1E8] px-3 py-1 text-xs font-bold text-[#344E41]">
-                      {post.category}
-                    </span>
-
-                    <h2 className="mt-3 line-clamp-2 text-xl font-black leading-tight text-[#344E41]">
-                      {post.title}
-                    </h2>
-
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#78847C]">
-                      {post.description}
-                    </p>
-                  </div>
-                </Link>
-
-                <div className="flex items-center gap-2 px-5 pb-5">
-  <Link
-    to={`/posts/${post._id}/edit`}
-    className="rounded-full bg-[#344E41] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#588157]"
-  >
-    Edit
-  </Link>
-
-  <button
-    onClick={() => handleDelete(post._id)}
-    className="rounded-full bg-[#FFE8ED] px-4 py-2 text-xs font-bold text-[#C23B5D] transition hover:bg-[#FFD5DF]"
-  >
-    Delete
-  </button>
-</div>
-              </div>
+                post={post}
+                showActions={true}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}

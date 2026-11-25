@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../lib/api";
-
+import useForm from "../hooks/useForm";
 const categories = [
   "Agriculture",
   "Business",
@@ -17,9 +17,17 @@ const EditPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
+  const {
+    formData: values,
+    setFormData,
+    handleChange,
+  } = useForm({
+    title: "",
+    category: "",
+    description: "",
+  });
+
+  const { title, category, description } = values;
   const [thumbnail, setThumbnail] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -33,9 +41,11 @@ const EditPost = () => {
 
         const post = response.data;
 
-        setTitle(post.title);
-        setCategory(post.category);
-        setDescription(post.description);
+        setFormData({
+          title: post.title,
+          category: post.category,
+          description: post.description,
+        });
       } catch (err) {
         console.error(err);
         setError("Failed to load this story.");
@@ -45,7 +55,7 @@ const EditPost = () => {
     };
 
     fetchPost();
-  }, [id]);
+  },  [id, setFormData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,7 +84,7 @@ const EditPost = () => {
 
       setError(
         err.response?.data?.message ||
-          "Failed to update story. Please try again."
+          "Failed to update story. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -84,9 +94,7 @@ const EditPost = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FFFDF8]">
-        <p className="font-bold text-[#344E41]">
-          Loading story...
-        </p>
+        <p className="font-bold text-[#344E41]">Loading story...</p>
       </div>
     );
   }
@@ -94,7 +102,6 @@ const EditPost = () => {
   return (
     <div className="min-h-[calc(100vh-72px)] overflow-y-auto bg-[#FFFDF8] px-4 py-8">
       <div className="mx-auto max-w-xl">
-
         <div className="mb-5 text-center">
           <div className="text-2xl">✏️</div>
 
@@ -109,19 +116,17 @@ const EditPost = () => {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-[24px] bg-white p-5 shadow-sm"
+          className="rounded-3xl bg-white p-5 shadow-sm"
         >
           <div className="grid gap-3 sm:grid-cols-2">
-
             <div>
-              <label className="text-xs font-bold text-[#344E41]">
-                Title
-              </label>
+              <label className="text-xs font-bold text-[#344E41]">Title</label>
 
               <input
                 type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                name="title"
+                value={values.title}
+                onChange={handleChange}
                 className="mt-1.5 w-full rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none transition focus:border-[#588157]"
               />
             </div>
@@ -132,8 +137,9 @@ const EditPost = () => {
               </label>
 
               <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                name="category"
+                value={values.category}
+                onChange={handleChange}
                 className="mt-1.5 w-full rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none transition focus:border-[#588157]"
               >
                 <option value="">Select category</option>
@@ -145,7 +151,6 @@ const EditPost = () => {
                 ))}
               </select>
             </div>
-
           </div>
 
           <div className="mt-3">
@@ -154,8 +159,9 @@ const EditPost = () => {
             </label>
 
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              name="description"
+              value={values.description}
+              onChange={handleChange}
               rows="5"
               className="mt-1.5 w-full resize-none rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none transition focus:border-[#588157]"
             />
@@ -201,7 +207,6 @@ const EditPost = () => {
             </button>
           </div>
         </form>
-
       </div>
     </div>
   );

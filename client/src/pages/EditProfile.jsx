@@ -1,23 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../lib/api";
-import useAuthStore from "../stores/authStore";
+import useForm from "../hooks/useForm";
 
 const EditProfile = () => {
-  const authUser = useAuthStore((state) => state.user);
-
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newConfirmPassword, setNewConfirmPassword] = useState("");
-
+  const {
+    formData: values,
+    setFormData,
+    handleChange,
+  } = useForm({
+    name: "",
+    email: "",
+    currentPassword: "",
+    newPassword: "",
+    newConfirmPassword: "",
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -25,24 +27,19 @@ const EditProfile = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Protect page
-  useEffect(() => {
-    if (!authUser) {
-      navigate("/login");
-    }
-  }, [authUser, navigate]);
-
   // Get profile
   useEffect(() => {
-    if (!authUser) return;
-
     const fetchUser = async () => {
       try {
         const response = await api.get(`/users/${id}`);
 
         setProfile(response.data);
-        setName(response.data.name);
-        setEmail(response.data.email);
+
+        setFormData((current) => ({
+          ...current,
+          name: response.data.name,
+          email: response.data.email,
+        }));
       } catch (err) {
         console.error(err);
         setError("Failed to load profile.");
@@ -52,8 +49,7 @@ const EditProfile = () => {
     };
 
     fetchUser();
-  }, [id, authUser]);
-
+  }, [id, setFormData]);
   // Change avatar
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -81,8 +77,7 @@ const EditProfile = () => {
       console.error(err);
 
       setError(
-        err.response?.data?.message ||
-          "Failed to change profile picture.",
+        err.response?.data?.message || "Failed to change profile picture.",
       );
     } finally {
       setAvatarLoading(false);
@@ -100,11 +95,11 @@ const EditProfile = () => {
       setSaving(true);
 
       const response = await api.patch("/users/edit-user", {
-        name,
-        email,
-        currentPassword,
-        newPassword,
-        newConfirmPassword,
+        name: values.name,
+        email: values.email,
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+        newConfirmPassword: values.newConfirmPassword,
       });
 
       setProfile((currentProfile) => ({
@@ -113,18 +108,18 @@ const EditProfile = () => {
         email: response.data.email,
       }));
 
-      setCurrentPassword("");
-      setNewPassword("");
-      setNewConfirmPassword("");
+      setFormData((current) => ({
+        ...current,
+        currentPassword: "",
+        newPassword: "",
+        newConfirmPassword: "",
+      }));
 
       setSuccess("Profile updated successfully.");
     } catch (err) {
       console.error(err);
 
-      setError(
-        err.response?.data?.message ||
-          "Failed to update profile.",
-      );
+      setError(err.response?.data?.message || "Failed to update profile.");
     } finally {
       setSaving(false);
     }
@@ -133,9 +128,7 @@ const EditProfile = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FFFDF8]">
-        <p className="font-bold text-[#344E41]">
-          Loading profile...
-        </p>
+        <p className="font-bold text-[#344E41]">Loading profile...</p>
       </div>
     );
   }
@@ -143,18 +136,14 @@ const EditProfile = () => {
   return (
     <div className="min-h-[calc(100vh-72px)] bg-[#FFFDF8] px-4 py-8">
       <div className="mx-auto max-w-md">
-
         <form
           onSubmit={handleSubmit}
-          className="rounded-[24px] bg-white p-5 shadow-sm"
+          className="rounded-3xl bg-white p-5 shadow-sm"
         >
-
           {/* Avatar */}
           <div className="text-center">
             <div className="relative mx-auto h-24 w-24">
-
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-[#A3B18A]">
-
                 {profile?.avatar ? (
                   <img
                     src={`http://localhost:5000/uploads/${profile.avatar}`}
@@ -164,11 +153,9 @@ const EditProfile = () => {
                 ) : (
                   <span className="text-3xl">👤</span>
                 )}
-
               </div>
 
               <label className="absolute bottom-0 right-0 cursor-pointer rounded-full bg-[#D94F8A] px-2.5 py-1.5 text-[10px] font-bold text-white shadow-sm">
-
                 {avatarLoading ? "..." : "Change"}
 
                 <input
@@ -177,9 +164,7 @@ const EditProfile = () => {
                   onChange={handleAvatarChange}
                   className="hidden"
                 />
-
               </label>
-
             </div>
 
             <h1 className="mt-4 text-xl font-black text-[#344E41]">
@@ -193,19 +178,16 @@ const EditProfile = () => {
 
           {/* Account Information */}
           <div className="mt-5">
-
             {/* Name + Email */}
             <div className="grid gap-3 sm:grid-cols-2">
-
               <div>
-                <label className="text-xs font-bold text-[#344E41]">
-                  Name
-                </label>
+                <label className="text-xs font-bold text-[#344E41]">Name</label>
 
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  name="name"
+                  value={values.name}
+                  onChange={handleChange}
                   className="mt-1.5 w-full rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none focus:border-[#588157]"
                 />
               </div>
@@ -217,57 +199,50 @@ const EditProfile = () => {
 
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
+                  value={values.email}
+                  onChange={handleChange}
                   className="mt-1.5 w-full rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none focus:border-[#588157]"
                 />
               </div>
-
             </div>
 
             {/* Password */}
             <div className="mt-4 border-t border-[#E8EDE8] pt-3">
-
               <p className="text-xs font-black text-[#344E41]">
                 Change Password
               </p>
 
               <div className="mt-2">
-
                 {/* Current Password */}
                 <input
                   type="password"
+                  name="currentPassword"
                   placeholder="Current password"
-                  value={currentPassword}
-                  onChange={(e) =>
-                    setCurrentPassword(e.target.value)
-                  }
+                  value={values.currentPassword}
+                  onChange={handleChange}
                   className="w-full rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none focus:border-[#588157]"
                 />
 
                 {/* New + Confirm */}
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-
                   <input
                     type="password"
+                    name="newPassword"
                     placeholder="New password"
-                    value={newPassword}
-                    onChange={(e) =>
-                      setNewPassword(e.target.value)
-                    }
+                    value={values.newPassword}
+                    onChange={handleChange}
                     className="w-full rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none focus:border-[#588157]"
                   />
 
                   <input
                     type="password"
+                    name="newConfirmPassword"
                     placeholder="Confirm new password"
-                    value={newConfirmPassword}
-                    onChange={(e) =>
-                      setNewConfirmPassword(e.target.value)
-                    }
+                    value={values.newConfirmPassword}
+                    onChange={handleChange}
                     className="w-full rounded-xl border border-[#DDE5DD] bg-[#F8FAF6] px-3 py-2.5 text-xs outline-none focus:border-[#588157]"
                   />
-
                 </div>
               </div>
             </div>
@@ -288,7 +263,6 @@ const EditProfile = () => {
 
           {/* Buttons */}
           <div className="mt-4 flex gap-2">
-
             <button
               type="button"
               onClick={() => navigate(`/profile/${id}`)}
@@ -304,9 +278,7 @@ const EditProfile = () => {
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
-
           </div>
-
         </form>
       </div>
     </div>
