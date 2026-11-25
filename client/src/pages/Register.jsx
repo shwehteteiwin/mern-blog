@@ -66,7 +66,7 @@ const Register = () => {
         <form
           autoComplete="off"
           onSubmit={handleRegister}
-          className="rounded-[32px] bg-white p-7 shadow-md"
+          className="rounded-4xl bg-white p-7 shadow-md"
         >
           <div className="grid gap-4 sm:grid-cols-2">
 

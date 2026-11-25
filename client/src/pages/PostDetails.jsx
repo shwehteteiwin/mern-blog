@@ -59,14 +59,14 @@ const PostDetail = () => {
           ← Back to Stories
         </Link>
 
-        <article className="mx-auto max-w-4xl overflow-hidden rounded-[32px] bg-white shadow-md md:flex">
+        <article className="mx-auto max-w-4xl overflow-hidden rounded-4xl bg-white shadow-md md:flex">
 
           {/* Image */}
           <div className="flex w-full items-center justify-center bg-[#F1F4EF] md:w-1/2">
             <img
               src={`http://localhost:5000/uploads/${post.thumbnail}`}
               alt={post.title}
-              className="max-h-[500px] w-full object-contain"
+              className="max-h-125 w-full object-contain"
             />
           </div>
 

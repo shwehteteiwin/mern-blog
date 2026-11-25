@@ -83,7 +83,7 @@ const AuthorPosts = () => {
         </div>
 
         {displayPosts.length === 0 ? (
-          <div className="rounded-[32px] bg-white px-6 py-14 text-center shadow-sm">
+          <div className="rounded-4xl bg-white px-6 py-14 text-center shadow-sm">
             <div className="text-6xl">📖</div>
 
             <h2 className="mt-5 text-2xl font-black text-[#344E41]">

@@ -91,7 +91,7 @@ const Home = () => {
                 <button
                   key={category.name}
                   onClick={() => setSelectedCategory(category.name)}
-                  className={`${category.bg} group min-w-[150px] shrink-0 rounded-[28px] px-4 py-2 text-center transition duration-300 hover:-translate-y-1 hover:shadow-lg`}
+                  className={`${category.bg} group min-w-37.5 shrink-0 rounded-[28px] px-4 py-2 text-center transition duration-300 hover:-translate-y-1 hover:shadow-lg`}
                 >
                   <p className="font-bold text-[#344E41]">
                     {category.name}
@@ -160,7 +160,7 @@ const Home = () => {
               ))}
             </div>
           ) : (
-            <div className="rounded-[32px] bg-white px-6 py-14 text-center shadow-sm">
+            <div className="rounded-4xl bg-white px-6 py-14 text-center shadow-sm">
               <div className="text-6xl">📖</div>
 
               <h3 className="mt-5 text-2xl font-black text-[#344E41]">
@@ -182,7 +182,7 @@ const Home = () => {
 
       {/* Find Your Story */}
       <section className="mx-auto max-w-7xl px-6 py-14">
-        <div className="overflow-hidden rounded-[36px] bg-gradient-to-r from-[#DDF2FF] via-[#E9F7E0] to-[#FFF0C7]">
+        <div className="overflow-hidden rounded-[36px] bg-linear-to-r from-[#DDF2FF] via-[#E9F7E0] to-[#FFF0C7]">
           <div className="grid items-center gap-8 px-8 py-10 md:grid-cols-2 md:px-12">
             <div>
               <p className="mb-2 text-sm font-bold uppercase tracking-widest text-[#588157]">
@@ -236,27 +236,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Start Writing CTA */}
-      {/* <section className="px-6 pb-16">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-[36px] bg-[#344E41] px-8 py-14 text-center text-white shadow-xl">
-          <div className="mx-auto max-w-2xl">
-            <div className="mb-4 text-5xl">✍️✨</div>
-
-            <h2 className="text-3xl font-black md:text-4xl">
-              Have a story of your own?
-            </h2>
-
-            <p className="mx-auto mt-4 max-w-lg leading-7 text-[#DCE8DF]">
-              Turn your ideas into stories and share them with a community of
-              curious readers and creative writers.
-            </p>
-
-            <button className="mt-7 rounded-full bg-white px-7 py-3.5 font-bold text-[#344E41] transition hover:-translate-y-1 hover:shadow-lg">
-              Start Writing ✨
-            </button>
-          </div>
-        </div>
-      </section> */}
     </div>
   );
 };
